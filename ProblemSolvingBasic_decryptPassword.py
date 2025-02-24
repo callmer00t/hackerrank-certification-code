@@ -16,25 +16,41 @@ import sys
 #
 
 def decryptPassword(s):
-    result = []
+    # Convert string to list for easier manipulation
+    password = list(s)
     i = 0
-    while i < len(s):
-        if i + 2 < len(s) and s[i].islower() and s[i + 1].isupper() and s[i + 2] == '*':
-            # Step 1: Swap the lowercase and uppercase characters and remove '*'
-            result.append(s[i + 1])
-            result.append(s[i])
-            i += 3  # Move past the swapped characters and '*'
-        elif s[i] == 'o' and i - 1 >= 0 and s[i - 1].isdigit():
-            # Step 2: If 'o' follows a digit, we need to restore the digit before 'o'
-            result.append(s[i - 1])
-            result.append('o')
-            i += 1  # Move past the 'o'
-        else:
-            # Step 3: Just append the character and move on
-            result.append(s[i])
-            i += 1
+    # Store numbers at the beginning
+    numbers = []
     
-    return ''.join(result)
+    # First, collect all leading numbers
+    while i < len(password) and password[i].isdigit():
+        numbers.append(password[i])
+        i += 1
+    
+    # Remove the leading numbers from password
+    password = password[i:]
+    
+    # Process the rest of the string
+    i = 0
+    while i < len(password):
+        # Handle zero replacement
+        if password[i] == '0':
+            # Replace '0' with the last collected number
+            password[i] = numbers.pop()
+        
+        # Handle swapped characters marked with '*'
+        elif i + 2 < len(password) and password[i+2] == '*':
+            # Swap back the characters
+            password[i], password[i+1] = password[i+1], password[i]
+            # Remove the '*'
+            password.pop(i+2)
+            i += 2
+            continue
+            
+        i += 1
+    
+    # Convert list back to string
+    return ''.join(password)
 
 if __name__ == '__main__':
     fptr = open(os.environ['OUTPUT_PATH'], 'w')
